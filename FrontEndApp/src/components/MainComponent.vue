@@ -82,7 +82,7 @@ function reloadPage(){
                          <div class="flex flex-col mb-4">
                               <div class="flex mt-8 mb-8 justify-around">
                                    <label id="input-insert" for="input-insert" class="text-3xl font-semibold truncate"
-                                        > {{ currentIndex < itens.length ? itens[currentIndex] : 'Todos os itens já foram adicionados' }}</label
+                                        > {{ currentIndex < itens.length ? itens[currentIndex] : 'Todos os itens já add!' }}</label
                                    >
                                    <input
                                         class="w-20 rounded-md text-center default:ring-1 border border-black"

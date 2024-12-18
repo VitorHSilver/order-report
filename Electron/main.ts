@@ -66,10 +66,7 @@ async function createWindow() {
           mainWindow.setAlwaysOnTop(false);
      }, 1000);
 
-     // Open the DevTools.
-     if (isDev) {
-          mainWindow.webContents.openDevTools();
-     }
+    
 
      let itemCount = 0;
      ipcMain.handle('insert-data', async (event, item) => {

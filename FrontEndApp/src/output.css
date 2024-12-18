@@ -604,9 +604,13 @@ video {
   width: 1rem;
   height: 1rem;
 }
-re
+
 .h-96 {
   height: 24rem;
+}
+
+.h-36 {
+  height: 9rem;
 }
 
 .w-20 {
