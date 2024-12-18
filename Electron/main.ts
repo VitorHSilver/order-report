@@ -3,7 +3,31 @@ import path from 'path';
 import { isDev } from './config';
 import { appConfig } from './ElectronStore/Configuration';
 import AppUpdater from './AutoUpdate';
-import  insertData  from '../models/database';
+import { createObjectCsvWriter } from 'csv-writer';
+import fs from 'fs';
+
+// Define the output directory based on the current date
+const date = new Date();
+const dateString = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date
+     .getDate()
+     .toString()
+     .padStart(2, '0')}`;
+const outputDir = path.join(__dirname, 'date_generated', dateString);
+
+// Create the output directory if it doesn't exist
+if (!fs.existsSync(outputDir)) {
+     fs.mkdirSync(outputDir, { recursive: true });
+}
+
+const csvWriter = createObjectCsvWriter({
+     path: path.join(outputDir, 'dados.csv'),
+     header: [
+          { id: 'name', title: 'Name' },
+          { id: 'quantity', title: 'Quantity' },
+     ],
+     append: true,
+     fieldDelimiter: ',',
+});
 
 async function createWindow() {
      const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -47,9 +71,15 @@ async function createWindow() {
           mainWindow.webContents.openDevTools();
      }
 
+     let itemCount = 0;
      ipcMain.handle('insert-data', async (event, item) => {
           try {
-               await insertData([item.name], [item.quantity]);
+               await csvWriter.writeRecords([{ name: item.name, quantity: item.quantity }]);
+               itemCount++;
+               if (itemCount % 14 === 0) {
+                    // Add a blank line after every 14 items
+                    await csvWriter.writeRecords([{}]);
+               }
                return { success: true };
           } catch (error) {
                console.error('Error inserting data:', error);

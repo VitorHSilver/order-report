@@ -1,6 +1,16 @@
 <script setup>
-import { ref } from 'vue'
-const { ipcRenderer } = require('electron')
+import { ref,onMounted } from 'vue'
+
+
+let ipcRenderer;
+onMounted(() => {
+    if (typeof window !== 'undefined' && window.electron) {
+        ipcRenderer = window.electron.ipcRenderer;
+    } else {
+     console.log('erro', error)
+        console.error('ipcRenderer is not defined');
+    }
+});
 
 const showSpinner = ref(false);
 const quantity = ref(0)
@@ -15,35 +25,43 @@ const itens = [
       'Carne',
       'Linguiça',
       'Frango',
-      'Coração',
+      'Coracao',
       'Kafta',
       'Queijo qualho',
-      'Queijo muçarela',
+      'Queijo mussarela',
       'Tulipa',
-      'Medalhão carne',
-      'Medalhão frango',
-      'Medalhão queijo',
-      'Medalhão mandioca',
+      'Medalhao carne',
+      'Medalhao frango',
+      'Medalhao queijo',
+      'Medalhao mandioca',
       'Misto',
       'Linguiça apimentada',
  ];
 
-async function insertName(){
-    if(currentIndex.value < itens.length){
-        const item = ({name: itens[currentIndex.value] , quantity: quantity.value})
-        itemList.value.push(item)
-        try{
-        const response = await ipcRenderer.invoke('insert-data',item); 
-        if(!response.sucess){
-            console.error('Error inserting data:', response.error);
-        }   
-        } catch (error) {
-            console.error('Error inserting data:', error);
+ async function insertName() {
+    if (currentIndex.value < itens.length) {
+        const item = { name: itens[currentIndex.value], quantity: quantity.value };
+        itemList.value.push(item);
+        if (ipcRenderer) {
+            try {
+                const response = await ipcRenderer.invoke('insert-data', item);
+                if (!response.success) {
+                    console.error('Error inserting data:', response.error);
+                }
+            } catch (error) {
+                console.error('Error inserting data:', error);
+            }
+        } else {
+            console.error('ipcRenderer is not defined');
         }
-        currentIndex.value++
-        quantity.value = ''
+        currentIndex.value++;
+        quantity.value = ''; // Reset the quantity input
     }
- }
+}
+
+function reloadPage(){
+     window.location.reload();
+}
 
 </script>
 
@@ -92,9 +110,10 @@ async function insertName(){
                                    <button
                                    id="buttonReset"
                                         type="reset"
-                                        class="bg-update uppercase text-gray-900 text-base px-4 rounded-md transition ease-in hover:scale-110 hover:bg-blue-900 duration-150 shadow-md"
+                                        class="bg-update uppercase text-gray-100 text-base px-4 rounded-md transition ease-in hover:scale-110 hover:bg-blue-900 duration-150 shadow-md"
+                                        @click="reloadPage"
                                    >
-                                        Alterar
+                                        Limpar
                                    </button>
                                    <span id="error" class="hidden"></span>
                               </div>
