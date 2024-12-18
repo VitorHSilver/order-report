@@ -4,7 +4,11 @@ import { isDev } from './config';
 import { appConfig } from './ElectronStore/Configuration';
 import AppUpdater from './AutoUpdate';
 import { createObjectCsvWriter } from 'csv-writer';
+import { insertData, showAllDates, dropTable } from '../models/database';
+import dotenv from 'dotenv';
 import fs from 'fs';
+
+dotenv.config();
 
 // Define the output directory based on the current date
 const date = new Date();
@@ -20,7 +24,7 @@ if (!fs.existsSync(outputDir)) {
 }
 
 const csvWriter = createObjectCsvWriter({
-     path: path.join(outputDir, 'dados.csv'),
+     path: path.join(outputDir, `${dateString}.csv`),
      header: [
           { id: 'name', title: 'Name' },
           { id: 'quantity', title: 'Quantity' },
@@ -28,6 +32,27 @@ const csvWriter = createObjectCsvWriter({
      append: true,
      fieldDelimiter: ',',
 });
+
+let itemCount = 0;
+ipcMain.handle('insert-data', async (event, item) => {
+     try {
+          await csvWriter.writeRecords([{ name: item.name, quantity: item.quantity }]);
+          itemCount++;
+          insertData(item);
+          if (itemCount % 14 === 0) {
+               // Add a blank line after every 14 items
+               await csvWriter.writeRecords([{}]);
+               showAllDates();
+          }
+
+          return { success: true };
+     } catch (error) {
+          console.error('Error inserting data:', error);
+          return { success: false, error: (error as Error).message };
+     }
+});
+
+//  Electron configuration
 
 async function createWindow() {
      const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -49,7 +74,7 @@ async function createWindow() {
 
      if (appBounds !== undefined && appBounds !== null) Object.assign(BrowserWindowOptions, appBounds);
      const mainWindow = new BrowserWindow(BrowserWindowOptions);
-
+     
      // auto updated
      if (!isDev) AppUpdater();
 
@@ -65,24 +90,6 @@ async function createWindow() {
      setTimeout(() => {
           mainWindow.setAlwaysOnTop(false);
      }, 1000);
-
-    
-
-     let itemCount = 0;
-     ipcMain.handle('insert-data', async (event, item) => {
-          try {
-               await csvWriter.writeRecords([{ name: item.name, quantity: item.quantity }]);
-               itemCount++;
-               if (itemCount % 14 === 0) {
-                    // Add a blank line after every 14 items
-                    await csvWriter.writeRecords([{}]);
-               }
-               return { success: true };
-          } catch (error) {
-               console.error('Error inserting data:', error);
-               return { success: false, error: (error as Error).message };
-          }
-     });
 
      ipcMain.handle('versions', () => {
           return {

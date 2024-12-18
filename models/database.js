@@ -10,38 +10,15 @@ db.serialize(() => {
      db.run(
           'CREATE TABLE IF NOT EXISTS product (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, qtd INTEGER, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);'
      );
-
-     const itens = [
-          'carne',
-          'linguiça',
-          'frango',
-          'coração',
-          'kafta',
-          'queijo qualho',
-          'queijo muçarela',
-          'tulipa',
-          'medalhão carne',
-          'medalhão frango',
-          'medalhão queijo',
-          'medalhão mandioca',
-          'misto',
-          'linguiça apimentada',
-     ];
-
-     insertData(itens); // Insere os itens com quantidade 10
-     showAllDates(); // Mostra todos os registros
-     // dropTable();
 });
 
-function insertData(itens, qtd) {
+function insertData(item) {
      const stmt = db.prepare('INSERT INTO product (name, qtd, created_at) VALUES (?, ?, ?)');
-     itens.forEach((item) => {
-          const createdAt = moment().tz('America/Sao_Paulo').format('YYYY-MM-DD HH:mm:ss');
-          stmt.run(item, qtd, createdAt, (err) => {
-               if (err) {
-                    console.error(err.message);
-               }
-          });
+     const createdAt = moment().tz('America/Sao_Paulo').format('YYYY-MM-DD HH:mm:ss');
+     stmt.run(item.name, item.quantity, createdAt, (err) => {
+          if (err) {
+               console.error(err.message);
+          }
      });
      stmt.finalize();
 }
@@ -55,6 +32,7 @@ function showAllDates() {
           }
      });
 }
+
 function dropTable() {
      db.run('DROP TABLE IF EXISTS product', (err) => {
           if (err) {
@@ -65,4 +43,4 @@ function dropTable() {
      });
 }
 
-module.exports = { insertData, showAllDates };
+module.exports = { insertData, showAllDates, dropTable };

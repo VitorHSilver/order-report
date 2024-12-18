@@ -1,6 +1,3 @@
-declare module 'database' {
-     export function insertData(itens: string[], qtd: number): void;
-     export function showAllDates(): void;
-     export function dropTable(): void;
-}
-
+export function insertData(item: { name: string; quantity: number }): void;
+export function showAllDates(): void;
+export function dropTable(): void;
