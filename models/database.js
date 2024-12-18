@@ -2,7 +2,7 @@ require('dotenv').config();
 const sqlite3 = require('sqlite3').verbose();
 const moment = require('moment-timezone');
 
-const dbPath = process.env.DB_PATH || 'C:/Users/Vitor/banco_db';
+const dbPath = 'C:/Users/Vitor/banco_db';
 
 const db = new sqlite3.Database(dbPath);
 

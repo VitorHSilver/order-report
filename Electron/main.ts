@@ -3,6 +3,7 @@ import path from 'path';
 import { isDev } from './config';
 import { appConfig } from './ElectronStore/Configuration';
 import AppUpdater from './AutoUpdate';
+import  insertData  from '../models/database';
 
 async function createWindow() {
      const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -45,6 +46,16 @@ async function createWindow() {
      if (isDev) {
           mainWindow.webContents.openDevTools();
      }
+
+     ipcMain.handle('insert-data', async (event, item) => {
+          try {
+               await insertData([item.name], [item.quantity]);
+               return { success: true };
+          } catch (error) {
+               console.error('Error inserting data:', error);
+               return { success: false, error: (error as Error).message };
+          }
+     });
 
      ipcMain.handle('versions', () => {
           return {

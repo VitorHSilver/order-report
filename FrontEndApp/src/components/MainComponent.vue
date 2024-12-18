@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+const { ipcRenderer } = require('electron')
 
 const showSpinner = ref(false);
 const quantity = ref(0)
@@ -27,9 +28,18 @@ const itens = [
       'Linguiça apimentada',
  ];
 
- function insertName(){
+async function insertName(){
     if(currentIndex.value < itens.length){
-        itemList.value.push({name: itens[currentIndex.value] , quantity: quantity.value})
+        const item = ({name: itens[currentIndex.value] , quantity: quantity.value})
+        itemList.value.push(item)
+        try{
+        const response = await ipcRenderer.invoke('insert-data',item); 
+        if(!response.sucess){
+            console.error('Error inserting data:', response.error);
+        }   
+        } catch (error) {
+            console.error('Error inserting data:', error);
+        }
         currentIndex.value++
         quantity.value = ''
     }
